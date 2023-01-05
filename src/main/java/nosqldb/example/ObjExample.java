@@ -17,13 +17,21 @@ public class ObjExample {
 
         select();
 
-//        delete();
+        delete();
     }
 
     public static void insert() {
-        Person zhangsan = new Person().setId("1").setName("zhangsan");
+        Person zhangsan = new Person().setId("7").setName("zhangsan");
         NoSqlObjTemplate noSqlObjTemplate = new NoSqlObjTemplate();
         noSqlObjTemplate.insert(zhangsan);
+
+//        int max=100;
+//        for (int i = 0; i < max; i++) {
+//            Person lisi = new Person().setId("1").setName("lisi");
+//            zhangsan = new Person().setId(RandUtil.uuId16()).setName(RandUtil.name());
+//            noSqlObjTemplate.insert(zhangsan);
+//        }
+
     }
 
     public static void delete() {

@@ -14,23 +14,31 @@ public class JsonExample {
     public static void main(String[] args) {
         JSONArray array = new JSONArray();
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("id","2");
+        jsonObject.put("id","1");
         jsonObject.put("msgid","6");
         array.add(jsonObject);
 
+//        jsonObject = new JSONObject();
+//        jsonObject.put("id","2");
+//        jsonObject.put("msgid","6");
+//        array.add(jsonObject);
+//
+//        jsonObject = new JSONObject();
+//        jsonObject.put("id","3");
+//        jsonObject.put("msgid","6");
+//        array.add(jsonObject);
 
         TableService.insert("person",array,"id");
-
         String person = TableService.selectByIndex("person", "2");
 
-//        JSONObject parse = (JSONObject) JSONObject.parse(person);
-//        System.out.println(parse);
+        JSONObject parse = (JSONObject) JSONObject.parse(person);
+        System.out.println(parse);
 
 
 
         TableService.updateByIndex("person", "2",jsonObject,"id");
 
-//        TableService.deleteByIndex("person","2");
+        TableService.deleteByIndex("person","2");
     }
 
 }

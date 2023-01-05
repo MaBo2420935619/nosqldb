@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 @Slf4j
@@ -47,14 +48,15 @@ public class TableService {
             if (jsonObject.getString(primary)==null){
                 throw new RuntimeException("主键不存在,主键: "+primary);
             }
-            int key = jsonObject.getInteger(primary);
             if (hasIndex){
-                String s = selectByIndex(tableName, String.valueOf(key));
+                String value = jsonObject.getString(primary);
+                String s = selectByIndex(tableName, value);
                 if (s!=null){
-                    throw new RuntimeException("主键重复,无法插入数据,重复的主键为:"+key);
+                    throw new RuntimeException("主键重复,无法插入数据,重复的主键为:"+value);
                 }
             }
-            KeyAndValue keyAndValue = new KeyAndValue(key,"-1");
+
+            KeyAndValue keyAndValue = new KeyAndValue(jsonObject.getString(primary),"-1");
             list.add(keyAndValue);
             datas.add(jsonArray.getJSONObject(i).toJSONString());
         }
@@ -160,7 +162,7 @@ public class TableService {
         JSONObject jsonIndex = new JSONObject();
         for (int i = 0; i < index.size(); i++) {
             KeyAndValue keyAndValue = index.get(i);
-            int key = keyAndValue.getKey();
+            String key = keyAndValue.getKey();
             String position = keyAndValue.getValue().toString();
             jsonIndex.put(String.valueOf(key),position);
         }
@@ -183,7 +185,7 @@ public class TableService {
                 if (string==null){
                     FileUtils.saveAsFileWriter(file.getAbsolutePath(),key+"|"+position,true);
                     jsonIndex.put(String.valueOf(key),position);
-                    KeyAndValue keyAndValue = new KeyAndValue(Integer.parseInt(split[0]),split[1]);
+                    KeyAndValue keyAndValue = new KeyAndValue(split[0],split[1]);
                     index.add(keyAndValue);
                 }
                 if (i%1000==0){
@@ -191,13 +193,19 @@ public class TableService {
                 }
             }
         }
-        Collections.sort(index);
+
+        Collections.sort(index, new Comparator<KeyAndValue>() {
+            @Override
+            public int compare(KeyAndValue o1, KeyAndValue o2) {
+              return   stringCompare(o1.getKey(),o2.getKey());
+            }
+        });
         count=jsonIndex.size();
         //索引写入缓存
         FileUtils.saveAsFileWriter(file.getAbsolutePath(),"key|position|"+ count,false);
         for (int i = 0; i < index.size(); i++) {
             KeyAndValue keyAndValue = index.get(i);
-            int key = keyAndValue.getKey();
+            String key = keyAndValue.getKey();
             String position = keyAndValue.getValue().toString();
             FileUtils.saveAsFileWriter(file.getAbsolutePath(),key+"|"+position,true);
         }
@@ -215,25 +223,26 @@ public class TableService {
     public static int binarySearch(int min,int max,String key,String filePath){
         int middle = (max + min) / 2;
         if (max>min){
-            int minIndex = getLineIndex(filePath, min);
-            int maxIndex = getLineIndex(filePath, max);
-            int middleIndex = getLineIndex(filePath, middle);
-            int keyIndex = Integer.parseInt(key);
-            if (keyIndex==minIndex){
+            String minIndex = getLineIndex(filePath, min);
+            String maxIndex = getLineIndex(filePath, max);
+            String middleIndex = getLineIndex(filePath, middle);
+            String keyIndex = key;
+            if (keyIndex.equals(minIndex)){
                 return min;
-            }else if (keyIndex==maxIndex){
+            }else if (keyIndex.equals(maxIndex)){
                 return max;
             }
-            if (keyIndex<minIndex||keyIndex>maxIndex){
+            if (stringCompare(keyIndex,middleIndex)<0||stringCompare(keyIndex,maxIndex)>0){
                 return -1;
             }
-            if (minIndex==middleIndex||maxIndex==middleIndex){
+
+            if (minIndex.equals(middleIndex)||maxIndex.equals(middleIndex)){
                 return -1;
             }
             else {
-                if (middleIndex>keyIndex){
+                if (stringCompare(middleIndex,keyIndex)>0){
                     return binarySearch(min,middle,key,filePath);
-                }else  if (middleIndex<keyIndex){
+                }else  if (stringCompare(middleIndex,keyIndex)<0){
                     return binarySearch(middle,max,key,filePath);
                 }
                 else {
@@ -242,26 +251,32 @@ public class TableService {
             }
         }
         else {
-            int minIndex = getLineIndex(filePath, min);
-            int maxIndex = getLineIndex(filePath, max);
-            int keyIndex = Integer.parseInt(key);
-            if (keyIndex==minIndex){
+            String minIndex = getLineIndex(filePath, min);
+            String maxIndex = getLineIndex(filePath, max);
+            String keyIndex = key;
+            if (keyIndex.equals(minIndex)){
                 return min;
             }
-            if (keyIndex==maxIndex){
+            if (keyIndex.equals(maxIndex)){
                 return max;
             }
         }
         return -1;
     }
 
-    public static int  getLineIndex(String filePath,int line){
+    public static String  getLineIndex(String filePath,int line){
         String s = FileUtils.readLine(filePath, line);
         String[] split = s.split("\\|");
         String s1 = split[0];
-        int i = Integer.parseInt(s1);
-        return i;
+        return s1;
     }
 
+
+    public static int stringCompare(String s1,String s2){
+        if (s1.compareToIgnoreCase(s2)>0){
+            return 1;
+        }
+        return -1;
+    }
 
 }
