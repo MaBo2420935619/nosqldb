@@ -232,7 +232,9 @@ public class TableService {
             }else if (keyIndex.equals(maxIndex)){
                 return max;
             }
-            if (stringCompare(keyIndex,middleIndex)<0||stringCompare(keyIndex,maxIndex)>0){
+            int i = stringCompare(keyIndex, minIndex);
+            int i1 = stringCompare(keyIndex, maxIndex);
+            if (stringCompare(keyIndex,minIndex)<0||stringCompare(keyIndex,maxIndex)>0){
                 return -1;
             }
 
