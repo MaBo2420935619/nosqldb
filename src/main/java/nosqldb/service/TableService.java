@@ -2,16 +2,16 @@ package nosqldb.service;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import nosqldb.entity.Person;
+import nosqldb.template.NoSqlObjTemplate;
 import nosqldb.tree.KeyAndValue;
 import nosqldb.util.FileUtils;
 import nosqldb.util.RandomAccessFileUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Slf4j
 public class TableService {
@@ -27,6 +27,7 @@ public class TableService {
     public static int listMaxSize=5000;
 
     public static synchronized int insert(String tableName,JSONArray jsonArray,String primary){
+        Date startDate = new Date();
         File file = new File(filePath+tableName + dataFileName);
         File fileIndex = new File(filePath+tableName + indexFileName);
         boolean hasIndex=true;
@@ -43,6 +44,9 @@ public class TableService {
         }
         List<KeyAndValue> list=new ArrayList();
         List<String> datas=new ArrayList();
+
+        //防止插入的数据存在主键重复
+        Map<String,String> keyMap = new HashMap<>();
         for (int i = 0; i < jsonArray.size(); i++) {
             JSONObject jsonObject = jsonArray.getJSONObject(i);
             if (jsonObject.getString(primary)==null){
@@ -50,12 +54,16 @@ public class TableService {
             }
             if (hasIndex){
                 String value = jsonObject.getString(primary);
+                if (keyMap.get(value)==null){
+                    keyMap.put(value,"1");
+                }else {
+                    throw new RuntimeException("主键重复,无法插入数据,重复的主键为:"+value);
+                }
                 String s = selectByIndex(tableName, value);
                 if (s!=null){
                     throw new RuntimeException("主键重复,无法插入数据,重复的主键为:"+value);
                 }
             }
-
             KeyAndValue keyAndValue = new KeyAndValue(jsonObject.getString(primary),"-1");
             list.add(keyAndValue);
             datas.add(jsonArray.getJSONObject(i).toJSONString());
@@ -73,11 +81,15 @@ public class TableService {
             }
         }
         createIndex(tableName,objects);
+        Date endDate = new Date();
+        long time = endDate.getTime() - startDate.getTime();
+        log.info("当前操作耗时"+time+"ms");
         return jsonArray.size();
     }
 
 
     public static synchronized Boolean deleteByIndex(String tableName,String key){
+        Date startDate = new Date();
         String s2 = selectByIndex(tableName, key);
         if (s2==null){
             throw new RuntimeException("数据查询失败,主键为: "+key);
@@ -98,15 +110,22 @@ public class TableService {
                 FileUtils.saveAsFileWriter(filePath + tableName +indexFileName,s,true);
             }
         }
+        Date endDate = new Date();
+        long time = endDate.getTime() - startDate.getTime();
+        log.info("当前操作耗时"+time+"ms");
         return b;
     }
 
     public static synchronized int updateByIndex(String tableName, String key, JSONObject value,String primary){
+        Date startDate = new Date();
         Boolean aBoolean = deleteByIndex(tableName, key);
         if (aBoolean){
             JSONArray array = new JSONArray();
             array.add(value);
             int insert = insert(tableName,array,primary);
+            Date endDate = new Date();
+            long time = endDate.getTime() - startDate.getTime();
+            log.info("当前操作耗时"+time+"ms");
             return insert;
         }else {
             return 0;
@@ -114,6 +133,7 @@ public class TableService {
     }
 
     public static synchronized String selectByIndex(String tableName, String key) {
+        Date startDate = new Date();
         //优化为二分法查找
         String indexFile = filePath + tableName + indexFileName;
         File file=new File(indexFile);
@@ -135,6 +155,9 @@ public class TableService {
         String[] split1 = s.split("\\|");
         String s1 = RandomAccessFileUtils.selectByIndex(filePath + tableName + dataFileName, Long.valueOf(split1[1]));
         log.info(key+"指针位置为:"+Long.valueOf(split1[1])+"查询到的数据为: "+s1);
+        Date endDate = new Date();
+        long time = endDate.getTime() - startDate.getTime();
+        log.info("当前操作耗时"+time+"ms");
         return s1;
     }
 
@@ -156,7 +179,7 @@ public class TableService {
     }
 
     public static void createIndex(String  tableName,List<KeyAndValue> index) {
-//        log.info("开始为表"+tableName+"创建索引");
+        Date startDate = new Date();
         String indexFilePath = filePath + tableName + indexFileName;
         File file = new File(indexFilePath);
         JSONObject jsonIndex = new JSONObject();
@@ -188,9 +211,6 @@ public class TableService {
                     KeyAndValue keyAndValue = new KeyAndValue(split[0],split[1]);
                     index.add(keyAndValue);
                 }
-                if (i>10000&&i%1000==0){
-                    log.info("还需要将"+(strings.size()-i)+"写入索引");
-                }
             }
         }
 
@@ -209,6 +229,9 @@ public class TableService {
             String position = keyAndValue.getValue().toString();
             FileUtils.saveAsFileWriter(file.getAbsolutePath(),key+"|"+position,true);
         }
+        Date endDate = new Date();
+        long time = endDate.getTime() - startDate.getTime();
+        log.info("生成索引耗时"+time+"ms");
     }
 
 
