@@ -28,17 +28,21 @@ public class JsonExample {
 //        jsonObject.put("msgid","6");
 //        array.add(jsonObject);
 
-        TableService.insert("person",array,"id");
-        String person = TableService.selectByIndex("person", "2");
+
+//        TableService.insert("person",array,"id");
+
+
+
+        String person = TableService.selectByIndex("person", "1000000329563738");
 
         JSONObject parse = (JSONObject) JSONObject.parse(person);
         System.out.println(parse);
 
 
-
-        TableService.updateByIndex("person", "2",jsonObject,"id");
-
-        TableService.deleteByIndex("person","2");
+//
+//        TableService.updateByIndex("person", "2",jsonObject,"id");
+//
+//        TableService.deleteByIndex("person","2");
     }
 
 }

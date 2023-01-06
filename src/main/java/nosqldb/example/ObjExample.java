@@ -9,15 +9,15 @@ import nosqldb.template.NoSqlObjTemplate;
  */
 public class ObjExample {
     public static void main(String[] args) {
-        insert();
+//        insert();
 
         select();
 
-        update();
-
-        select();
-
-        delete();
+//        update();
+//
+//        select();
+//
+//        delete();
     }
 
     public static void insert() {
@@ -27,7 +27,6 @@ public class ObjExample {
 
 //        int max=100;
 //        for (int i = 0; i < max; i++) {
-//            Person lisi = new Person().setId("1").setName("lisi");
 //            zhangsan = new Person().setId(RandUtil.uuId16()).setName(RandUtil.name());
 //            noSqlObjTemplate.insert(zhangsan);
 //        }
@@ -47,6 +46,7 @@ public class ObjExample {
 
     public static void select() {
         NoSqlObjTemplate noSqlObjTemplate = new NoSqlObjTemplate();
-        noSqlObjTemplate.select("1",Person.class);
+        Person select = noSqlObjTemplate.select("1000001883880210", Person.class);
+        System.out.println(select);
     }
 }
