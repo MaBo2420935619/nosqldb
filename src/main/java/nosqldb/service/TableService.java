@@ -26,7 +26,7 @@ public class TableService {
 
     public static int listMaxSize=5000;
 
-    public static int insert(String tableName,JSONArray jsonArray,String primary){
+    public static synchronized int insert(String tableName,JSONArray jsonArray,String primary){
         File file = new File(filePath+tableName + dataFileName);
         File fileIndex = new File(filePath+tableName + indexFileName);
         boolean hasIndex=true;
@@ -77,7 +77,7 @@ public class TableService {
     }
 
 
-    public static Boolean deleteByIndex(String tableName,String key){
+    public static synchronized Boolean deleteByIndex(String tableName,String key){
         String s2 = selectByIndex(tableName, key);
         if (s2==null){
             throw new RuntimeException("数据查询失败,主键为: "+key);
@@ -101,7 +101,7 @@ public class TableService {
         return b;
     }
 
-    public static int updateByIndex(String tableName, String key, JSONObject value,String primary){
+    public static synchronized int updateByIndex(String tableName, String key, JSONObject value,String primary){
         Boolean aBoolean = deleteByIndex(tableName, key);
         if (aBoolean){
             JSONArray array = new JSONArray();
@@ -113,7 +113,7 @@ public class TableService {
         }
     }
 
-    public static String selectByIndex(String tableName, String key) {
+    public static synchronized String selectByIndex(String tableName, String key) {
         //优化为二分法查找
         String indexFile = filePath + tableName + indexFileName;
         File file=new File(indexFile);
@@ -188,7 +188,7 @@ public class TableService {
                     KeyAndValue keyAndValue = new KeyAndValue(split[0],split[1]);
                     index.add(keyAndValue);
                 }
-                if (i%1000==0){
+                if (i>10000&&i%1000==0){
                     log.info("还需要将"+(strings.size()-i)+"写入索引");
                 }
             }

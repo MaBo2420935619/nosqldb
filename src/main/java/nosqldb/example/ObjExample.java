@@ -3,15 +3,23 @@ package nosqldb.example;
 import nosqldb.entity.Person;
 import nosqldb.template.NoSqlObjTemplate;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 /**
  * 该样例实现了基于实体的增删改查
  * 注意，实体的属性上必须用@NoSqlPrimary标注主键，否则异常
  */
 public class ObjExample {
-    public static void main(String[] args) {
-//        insert();
 
-        select();
+    public static SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:sss");
+    public static void main(String[] args) {
+        insert();
+
+
+//        insertOne();
+
+//        select();
 
 //        update();
 //
@@ -23,13 +31,34 @@ public class ObjExample {
     public static void insert() {
         Person zhangsan = new Person().setId("7").setName("zhangsan");
         NoSqlObjTemplate noSqlObjTemplate = new NoSqlObjTemplate();
-        noSqlObjTemplate.insert(zhangsan);
+//        noSqlObjTemplate.insert(zhangsan);
+        int time=1000;
+        int max=1000;
+        for (int j = 0; j < time; j++) {
+            for (int i = 0; i < max; i++) {
+                zhangsan = new Person().setId(RandUtil.uuId16()).setName(RandUtil.name());
+                noSqlObjTemplate.insert(zhangsan);
+            }
+            System.out.println("当前为第"+j);
+            System.out.println("当前时间为"+sdf.format(new Date()));
+        }
 
-//        int max=100;
-//        for (int i = 0; i < max; i++) {
-//            zhangsan = new Person().setId(RandUtil.uuId16()).setName(RandUtil.name());
-//            noSqlObjTemplate.insert(zhangsan);
-//        }
+    }
+
+    public static void insertOne() {
+        int max=1000;
+        long sum=0;
+        for (int i = 0; i < max; i++) {
+            Date startDate = new Date();
+            Person zhangsan =  new Person().setId(RandUtil.uuId16()).setName(RandUtil.name());
+            NoSqlObjTemplate noSqlObjTemplate = new NoSqlObjTemplate();
+            noSqlObjTemplate.insert(zhangsan);
+            Date endDate = new Date();
+            long time = endDate.getTime() - startDate.getTime();
+            sum +=time;
+            System.out.println("当前插入操作耗时"+time);
+        }
+        System.out.println(max+"条数据插入平均耗时"+sum/max);
 
     }
 
