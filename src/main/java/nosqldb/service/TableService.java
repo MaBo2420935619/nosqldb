@@ -83,7 +83,7 @@ public class TableService {
         createIndex(tableName,objects);
         Date endDate = new Date();
         long time = endDate.getTime() - startDate.getTime();
-        log.info("当前操作耗时"+time+"ms");
+        log.info("插入操作耗时"+time+"ms");
         return jsonArray.size();
     }
 
@@ -98,6 +98,7 @@ public class TableService {
         boolean b = RandomAccessFileUtils.deleteByIndex(filePath + tableName + dataFileName, indexStart);
         List<String> list = FileUtils.readFile02(filePath + tableName + indexFileName);
         //重新生成索引
+        //遍历索引数据，如果当前是key跳过，其他正常写入文件
         String s1 = FileUtils.readLine(filePath + tableName + indexFileName, 0);
         String[] split1 = s1.split("\\|");
         int count = Integer.parseInt(split1[2]);
@@ -112,7 +113,7 @@ public class TableService {
         }
         Date endDate = new Date();
         long time = endDate.getTime() - startDate.getTime();
-        log.info("当前操作耗时"+time+"ms");
+        log.info("删除操作耗时"+time+"ms");
         return b;
     }
 
@@ -125,7 +126,7 @@ public class TableService {
             int insert = insert(tableName,array,primary);
             Date endDate = new Date();
             long time = endDate.getTime() - startDate.getTime();
-            log.info("当前操作耗时"+time+"ms");
+            log.info("更新操作耗时"+time+"ms");
             return insert;
         }else {
             return 0;
@@ -157,7 +158,7 @@ public class TableService {
         log.info(key+"指针位置为:"+Long.valueOf(split1[1])+"查询到的数据为: "+s1);
         Date endDate = new Date();
         long time = endDate.getTime() - startDate.getTime();
-        log.info("当前操作耗时"+time+"ms");
+        log.info("查询操作耗时"+time+"ms");
         return s1;
     }
 

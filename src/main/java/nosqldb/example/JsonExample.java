@@ -19,7 +19,7 @@ public class JsonExample {
         array.add(jsonObject);
 
 //        jsonObject = new JSONObject();
-//        jsonObject.put("id","2");
+//        jsonObject.put("id","1");
 //        jsonObject.put("msgid","6");
 //        array.add(jsonObject);
 //
@@ -33,7 +33,7 @@ public class JsonExample {
 
 
 
-        String person = TableService.selectByIndex("person", "1000000329563738");
+        String person = TableService.selectByIndex("person", "1");
 
         JSONObject parse = (JSONObject) JSONObject.parse(person);
         System.out.println(parse);

@@ -4,7 +4,9 @@ import nosqldb.entity.Person;
 import nosqldb.template.NoSqlObjTemplate;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 该样例实现了基于实体的增删改查
@@ -14,7 +16,7 @@ public class ObjExample {
 
     public static SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:sss");
     public static void main(String[] args) {
-        insert();
+//        insert();
 
 
 //        insertOne();
@@ -35,10 +37,12 @@ public class ObjExample {
         int time=1000;
         int max=1000;
         for (int j = 0; j < time; j++) {
+            List<Person> list = new ArrayList<>();
             for (int i = 0; i < max; i++) {
                 zhangsan = new Person().setId(RandUtil.uuId16()).setName(RandUtil.name());
-                noSqlObjTemplate.insert(zhangsan);
+                list.add(zhangsan);
             }
+            noSqlObjTemplate.insert(list);
             System.out.println("当前为第"+j);
             System.out.println("当前时间为"+sdf.format(new Date()));
         }
@@ -46,7 +50,7 @@ public class ObjExample {
     }
 
     public static void insertOne() {
-        int max=1000;
+        int max=10;
         long sum=0;
         for (int i = 0; i < max; i++) {
             Date startDate = new Date();
@@ -56,7 +60,6 @@ public class ObjExample {
             Date endDate = new Date();
             long time = endDate.getTime() - startDate.getTime();
             sum +=time;
-            System.out.println("当前插入操作耗时"+time);
         }
         System.out.println(max+"条数据插入平均耗时"+sum/max);
 
@@ -75,7 +78,7 @@ public class ObjExample {
 
     public static void select() {
         NoSqlObjTemplate noSqlObjTemplate = new NoSqlObjTemplate();
-        Person select = noSqlObjTemplate.select("1000001883880210", Person.class);
+        Person select = noSqlObjTemplate.select("1000000489439888", Person.class);
         System.out.println(select);
     }
 }
